@@ -1,24 +1,29 @@
-from pathlib import Path
-import sys
+"""
+Анализатор логов
+"""
 import os
-from datetime import datetime
 import logging
-from collections import namedtuple, defaultdict
 import json
 import gzip
 import re
+
+from datetime import datetime
+from argparse import ArgumentParser
+from configparser import ConfigParser
+from pathlib import Path
+from collections import namedtuple
 from copy import copy
 from string import Template
 
-import argparse
+
+DEFAULT_CONFIG_FILE_PATH = 'config.ini'
+REPORT_TEMPLATE = 'report-template.html'
 
 DEFAULT_CONFIG = {
-    'logfile': None,
     'threshold': 50,
     'log_dir': '/var/log/nginx/',
-    'report_dir': 'reports',
+    'report_dir': 'reports-examples',
     'log_names_date_format': '%Y%m%d',
-    'log_filename': None,
     'log_names_prefix': 'access.log-',
     'log_names_regexp': r"^nginx-access-ui\.log-(\d{8})\.(gz|log)$",
     'log_format':
@@ -27,60 +32,27 @@ DEFAULT_CONFIG = {
         r' ((\"(?P<method>GET|POST|PATCH|OPTIONS) )(?P<url>.+)((HTTP|http)\/[0-9]\.[0-9]")) (?P<statuscode>\d{3})'
         r' (?P<bytessent>\d+) (["](?P<referer>(\-)|(\S+))["]) (["](?P<useragent>.+)["])'
         r' (?P<request_time>([0-9]*[.])?[0-9]+) - (["](?P<host>(\-)|(.+))["])',
-    'report_template': 'report.html',
-}
-
-script_name, *args = sys.argv
-script_name = script_name.split('/')[-1]
-
-args_dict = {
-    'config': {
-        'desc': 'path to custom configuration file',
-        'usage': f'\t{script_name} --config [config.json]',
-        'action': None},
-    'help': {
-        'desc': 'show this help',
-        'usage': f'\t{script_name} --help',
-        'action': None}
 }
 
 
-def show_help(*args):
-    print("\nAvailable parameters:\n")
-    for arg, props in args_dict.items():
-        print(arg, '\t', props['desc'])
-        print('Usage:', '\n', props['usage'])
-
-
-args_dict['help']['action'] = show_help
-
-
-def read_conf(*args):
-    cargs = len(args)
-    if cargs > 1:
-        args_dict['help']['action']()
-        quit()
-    if cargs == 1:
-        conf_file = 'config.json'
-    else:
-        conf_file = args[0][0]
+def read_conf(conf_file=None):
+    if conf_file is None:
+        return {}
     try:
+        print(conf_file)
         with open(conf_file) as f:
-            custom_config = json.load(f)
+            return json.load(f)
     except Exception as e:
         print("Error when reading config file")
         print(e)
         quit()
-    return custom_config
-
-
-args_dict['config']['action'] = read_conf
 
 
 def get_latest_log(config):
 
     Log = namedtuple('Log', 'dt ext path')
-    if config['target_log_filename'] is not None:
+
+    if config.get('target_log_filename') is not None:
         fn = config['target_log_filename']
         ext = fn.split(".").pop()
         log_path = os.path.join(config['log_dir'], fn)
@@ -140,65 +112,53 @@ def parse_lines(log_format, lines):
 
     urls = dict()
 
-    try:
-        while True:
+    while True:
+        try:
             line = re.match(log_format, next(lines))
-            if not line:
-                logging.info("Log file is empty or not match to required `log_format`")
-                raise StopIteration
-            req_time = float(line.group('request_time'))
-            url_ = line.group('url')
-            method = line.group('method')
-            url_method = method+'::'+url_
-            row = urls.get(url_method, copy(url_init))
-            row['url'] = url_
-            try:
-                row['a_host'] = line.group('host')
-            except IndexError:
-                pass
-            row['a_method'] = line.group('method')
-            row['count'] += 1
-            row['time_sum'] += req_time
-            row['time_avg'] = round(row['time_sum'] / row['count'], 3)
-            row['time_max'] = req_time if row['time_max'] < req_time else row['time_max']
-            urls[url_method] = row
 
-            total_requests += 1
-            total_req_time += req_time
+        except StopIteration:
+            logging.info("Parsing log file finished")
+            return total_requests, total_req_time, urls
 
-    except StopIteration:
-        logging.info("Parsing log file finished")
-        return total_requests, total_req_time, urls
+        if not line:
+            # TODO: check for threshold
+            continue
+
+        req_time = float(line.group('request_time'))
+        url_ = line.group('url')
+        method = line.group('method')
+        url_method = method+'::'+url_
+        row = urls.get(url_method, copy(url_init))
+        row['url'] = url_
+        try:
+            row['a_host'] = line.group('host')
+        except IndexError:
+            pass
+        row['a_method'] = line.group('method')
+        row['count'] += 1
+        row['time_sum'] += req_time
+        row['time_avg'] = round(row['time_sum'] / row['count'], 3)
+        row['time_max'] = req_time if row['time_max'] < req_time else row['time_max']
+        urls[url_method] = row
+
+        total_requests += 1
+        total_req_time += req_time
 
 
-if __name__ == '__main__':
+def main():
+    parser = ArgumentParser(__doc__)
+    parser.add_argument('--config', default=DEFAULT_CONFIG_FILE_PATH, help='Use a custom config', nargs='?')
+    args = parser.parse_args()
 
-    for idx, arg in enumerate(args):
-        if arg.startswith('--'):
-            arg = arg[2:]
-            if arg in args_dict.keys():
-                arg_params = []
-                for p in args[idx + 1:]:
-                    if p.startswith('--'):
-                        break
-                    arg_params.append(p)
-                if arg == 'config':
-                    custom_config = args_dict[arg]['action'](arg_params)
-                    config = copy(DEFAULT_CONFIG)
-                    config.update(custom_config)
-                    continue
-                args_dict[arg]['action'](arg_params)
-                # setattr(params, arg, args[idx+1])
-            else:
-                print(777)
-                show_help()
-                quit()
-    print(888)
+    config = ConfigParser(defaults=DEFAULT_CONFIG)
+    config.read(args.config or DEFAULT_CONFIG_FILE_PATH)
+    config = config['main']
+
     logging.basicConfig(
         level='INFO',
         datefmt='%Y.%m.%d %H:%M:%S',
         format='[%(asctime)s] %(levelname).1s %(message)s',
-        filename=config['logfile'])
+        filename=config.get('logfile'))
 
     logging.info("Starting...")
 
@@ -207,36 +167,38 @@ if __name__ == '__main__':
     if latest_log is None:
         logging.info(
             f"No log files that match the template \
-            `[{config['log_names_prefix']}|{config['log_names_regexp']}]-{config['log_date_format']}.[gz|log]` \
-            in `log_dir` ({config['log_dir']})\n--end--")
+                `[{config['log_names_prefix']}|{config['log_names_regexp']}]-{config['log_date_format']}.[gz|log]` \
+                in `log_dir` ({config['log_dir']})\n--end--")
         quit()
 
     if latest_log.dt is None:
-        report_name_postfix = 'target-'+datetime.today().strftime("%Y.%m.%d.%H%M")
+        report_name_postfix = 'target-' + datetime.today().strftime("%Y.%m.%d.%H%M")
     else:
         report_name_postfix = latest_log.dt.strftime("%Y.%m.%d")
 
     latest_log_report_name = f'report-{report_name_postfix}.html'
     latest_log_report_path = os.path.join(config['report_dir'], latest_log_report_name)
 
-    # TODO
-    # if os.path.exists(latest_log_report_path):
-    #     logging.info(f"Report on latest logfile already exist. \n--end--")
-    #     quit()
+    if os.path.exists(latest_log_report_path):
+        logging.info(f"Report on latest logfile already exist. \n--end--")
+        quit()
 
     log_lines = parse_log(latest_log)()
 
     total_requests, total_req_time, urls = parse_lines(config['log_format'], log_lines)
 
     for url, stat in urls.items():
-        stat['count_perc'] = round(stat['count'] /(total_requests or .0001)*100, 2)
-        stat['time_perc'] = round(stat['time_sum'] /(total_req_time or .0001)*100, 2)
+        stat['count_perc'] = round(stat['count'] / total_requests * 100, 2)
+        stat['time_perc'] = round(stat['time_sum'] / total_req_time * 100, 2)
 
-    with open(config['report_template'], 'rb') as f:
+    with open(REPORT_TEMPLATE, 'rb') as f:
         template = Template(f.read().decode('utf-8'))
-    print(json.dumps(list(urls.values())))
     report = template.safe_substitute(table_json=json.dumps(list(urls.values())))
 
     with open(latest_log_report_path, 'wb') as report_file:
         Path(config['report_dir']).mkdir(parents=True, exist_ok=True)
         report_file.write(report.encode('utf-8'))
+
+
+if __name__ == '__main__':
+    main()
