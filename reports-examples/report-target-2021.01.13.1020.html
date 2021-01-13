@@ -1,0 +1,137 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>log analysis report</title>
+  <meta name="description" content="log analysis report">
+  <style type="text/css">
+    html, body {
+      background-color: black;
+    }
+    th {
+      text-align: center;
+      color: silver;
+      font-style: bold;
+      padding: 5px;
+      cursor: pointer;
+    }
+    table {
+      width: auto;
+      border-collapse: collapse;
+      margin: 1%;
+      color: silver;
+    }
+    td {
+      text-align: right;
+      font-size: 1.1em;
+      padding: 5px;
+    }
+    .report-table-body-cell-url {
+      text-align: left;
+      width: 20%;
+    }
+    .clipped {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow:hidden !important;
+      max-width: 700px;
+      word-wrap: break-word;
+      display:inline-block;
+    }
+    .url {
+      cursor: pointer;
+      color: #729FCF;
+    }
+    .alert {
+      color: red;
+    }
+  </style>
+</head>
+
+<body>
+  <table border="1" class="report-table">
+  <thead>
+    <tr class="report-table-header-row">
+    </tr>
+  </thead>
+  <tbody class="report-table-body">
+  </tbody>
+
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.1/js/jquery.tablesorter.min.js"></script>
+  <script type="text/javascript">
+  !function($) {
+    var table = [{"count": 14, "time_sum": 0.5229999999999999, "time_avg": 0.037, "time_max": 0.065, "time_med": 0.0, "url": "/api/v1/vselect/hcomplexs/8 ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.55, "time_perc": 0.33}, {"count": 54, "time_sum": 1.2440000000000004, "time_avg": 0.023, "time_max": 0.063, "time_med": 0.0, "url": "/api/v1/vselect/ ", "a_host": "eva.prod.alertgroup.ru", "a_method": "POST", "count_perc": 5.97, "time_perc": 0.79}, {"count": 7, "time_sum": 0.08499999999999999, "time_avg": 0.012, "time_max": 0.014, "time_med": 0.0, "url": "/api/v1/vselect/hcomplexs/renders/87 ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 0.77, "time_perc": 0.05}, {"count": 7, "time_sum": 2.0740000000000003, "time_avg": 0.296, "time_max": 0.515, "time_med": 0.0, "url": "/catalog/complexes/8/ ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 0.77, "time_perc": 1.32}, {"count": 14, "time_sum": 3.405, "time_avg": 0.243, "time_max": 3.251, "time_med": 0.0, "url": "/css/11.0e433876.css ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.55, "time_perc": 2.16}, {"count": 14, "time_sum": 3.031, "time_avg": 0.216, "time_max": 2.85, "time_med": 0.0, "url": "/css/13.0e433876.css ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.55, "time_perc": 1.92}, {"count": 14, "time_sum": 3.0199999999999996, "time_avg": 0.216, "time_max": 2.85, "time_med": 0.0, "url": "/css/12.0e433876.css ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.55, "time_perc": 1.92}, {"count": 21, "time_sum": 0.25900000000000006, "time_avg": 0.012, "time_max": 0.052, "time_med": 0.0, "url": "/css/app.4f88c048.css ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 2.32, "time_perc": 0.16}, {"count": 14, "time_sum": 4.697000000000001, "time_avg": 0.336, "time_max": 3.251, "time_med": 0.0, "url": "/css/10.918d4caa.css ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.55, "time_perc": 2.98}, {"count": 21, "time_sum": 0.31200000000000006, "time_avg": 0.015, "time_max": 0.052, "time_med": 0.0, "url": "/js/app.02b8cde7.js ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 2.32, "time_perc": 0.2}, {"count": 14, "time_sum": 3.0489999999999995, "time_avg": 0.218, "time_max": 2.85, "time_med": 0.0, "url": "/css/14.0e433876.css ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.55, "time_perc": 1.94}, {"count": 16, "time_sum": 3.085, "time_avg": 0.193, "time_max": 2.85, "time_med": 0.0, "url": "/css/15.61721e45.css ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.77, "time_perc": 1.96}, {"count": 14, "time_sum": 3.047999999999999, "time_avg": 0.218, "time_max": 2.85, "time_med": 0.0, "url": "/css/16.d0183678.css ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.55, "time_perc": 1.93}, {"count": 21, "time_sum": 3.105999999999999, "time_avg": 0.148, "time_max": 2.85, "time_med": 0.0, "url": "/css/18.8e45510c.css ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 2.32, "time_perc": 1.97}, {"count": 14, "time_sum": 3.0489999999999995, "time_avg": 0.218, "time_max": 2.85, "time_med": 0.0, "url": "/css/17.046a4168.css ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.55, "time_perc": 1.94}, {"count": 14, "time_sum": 3.069999999999999, "time_avg": 0.219, "time_max": 2.85, "time_med": 0.0, "url": "/css/19.3b39b27e.css ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.55, "time_perc": 1.95}, {"count": 14, "time_sum": 3.0479999999999996, "time_avg": 0.218, "time_max": 2.85, "time_med": 0.0, "url": "/css/3.0e433876.css ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.55, "time_perc": 1.93}, {"count": 14, "time_sum": 3.012999999999999, "time_avg": 0.215, "time_max": 2.85, "time_med": 0.0, "url": "/css/7.51cc8b75.css ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.55, "time_perc": 1.91}, {"count": 14, "time_sum": 3.0149999999999992, "time_avg": 0.215, "time_max": 2.85, "time_med": 0.0, "url": "/css/6.1d929e6b.css ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.55, "time_perc": 1.91}, {"count": 21, "time_sum": 3.100999999999999, "time_avg": 0.148, "time_max": 2.85, "time_med": 0.0, "url": "/css/9.ff42f3e7.css ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 2.32, "time_perc": 1.97}, {"count": 14, "time_sum": 3.0319999999999987, "time_avg": 0.217, "time_max": 2.85, "time_med": 0.0, "url": "/js/10.362f9c9f.js ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.55, "time_perc": 1.92}, {"count": 14, "time_sum": 3.0359999999999996, "time_avg": 0.217, "time_max": 2.85, "time_med": 0.0, "url": "/css/8.197a3c80.css ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.55, "time_perc": 1.93}, {"count": 14, "time_sum": 3.041, "time_avg": 0.217, "time_max": 2.85, "time_med": 0.0, "url": "/js/11.d729eb39.js ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.55, "time_perc": 1.93}, {"count": 14, "time_sum": 3.039999999999999, "time_avg": 0.217, "time_max": 2.85, "time_med": 0.0, "url": "/js/12.2b56adb4.js ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.55, "time_perc": 1.93}, {"count": 21, "time_sum": 0.7760000000000002, "time_avg": 0.037, "time_max": 0.283, "time_med": 0.0, "url": "/css/vendor.fa4ac754.css ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 2.32, "time_perc": 0.49}, {"count": 31, "time_sum": 3.552, "time_avg": 0.115, "time_max": 2.85, "time_med": 0.0, "url": "/css/5.c08732ae.css ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 3.43, "time_perc": 2.25}, {"count": 33, "time_sum": 3.5919999999999983, "time_avg": 0.109, "time_max": 2.85, "time_med": 0.0, "url": "/css/chunk-common.34f2db25.css ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 3.65, "time_perc": 2.28}, {"count": 14, "time_sum": 3.359999999999999, "time_avg": 0.24, "time_max": 2.925, "time_med": 0.0, "url": "/js/13.429b2a9c.js ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.55, "time_perc": 2.13}, {"count": 14, "time_sum": 3.3139999999999996, "time_avg": 0.237, "time_max": 2.925, "time_med": 0.0, "url": "/js/14.d77be158.js ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.55, "time_perc": 2.1}, {"count": 16, "time_sum": 3.319999999999999, "time_avg": 0.207, "time_max": 2.925, "time_med": 0.0, "url": "/js/15.3f6ad38b.js ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.77, "time_perc": 2.11}, {"count": 14, "time_sum": 3.285999999999999, "time_avg": 0.235, "time_max": 2.904, "time_med": 0.0, "url": "/js/16.bb182217.js ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.55, "time_perc": 2.09}, {"count": 14, "time_sum": 3.282999999999999, "time_avg": 0.234, "time_max": 2.904, "time_med": 0.0, "url": "/js/17.c8f5fbbd.js ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.55, "time_perc": 2.08}, {"count": 21, "time_sum": 3.3379999999999996, "time_avg": 0.159, "time_max": 2.904, "time_med": 0.0, "url": "/js/18.cd32e5b9.js ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 2.32, "time_perc": 2.12}, {"count": 14, "time_sum": 3.261999999999999, "time_avg": 0.233, "time_max": 2.904, "time_med": 0.0, "url": "/js/19.8149b647.js ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.55, "time_perc": 2.07}, {"count": 14, "time_sum": 3.2769999999999997, "time_avg": 0.234, "time_max": 2.904, "time_med": 0.0, "url": "/js/2.a4023a61.js ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.55, "time_perc": 2.08}, {"count": 14, "time_sum": 3.2729999999999997, "time_avg": 0.234, "time_max": 2.904, "time_med": 0.0, "url": "/js/20.3daace75.js ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.55, "time_perc": 2.08}, {"count": 14, "time_sum": 3.279, "time_avg": 0.234, "time_max": 2.904, "time_med": 0.0, "url": "/js/21.fbe9f220.js ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.55, "time_perc": 2.08}, {"count": 14, "time_sum": 3.2799999999999994, "time_avg": 0.234, "time_max": 2.904, "time_med": 0.0, "url": "/js/22.75d4b646.js ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.55, "time_perc": 2.08}, {"count": 24, "time_sum": 3.4019999999999984, "time_avg": 0.142, "time_max": 2.904, "time_med": 0.0, "url": "/js/23.64a7a85a.js ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 2.65, "time_perc": 2.16}, {"count": 14, "time_sum": 3.2659999999999996, "time_avg": 0.233, "time_max": 2.904, "time_med": 0.0, "url": "/js/3.028a9a03.js ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.55, "time_perc": 2.07}, {"count": 31, "time_sum": 3.599, "time_avg": 0.116, "time_max": 2.904, "time_med": 0.0, "url": "/js/5.45a9fc4d.js ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 3.43, "time_perc": 2.28}, {"count": 14, "time_sum": 3.2849999999999997, "time_avg": 0.235, "time_max": 2.904, "time_med": 0.0, "url": "/js/6.15affe43.js ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.55, "time_perc": 2.09}, {"count": 14, "time_sum": 3.2670000000000003, "time_avg": 0.233, "time_max": 2.904, "time_med": 0.0, "url": "/js/7.099b1fe8.js ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.55, "time_perc": 2.07}, {"count": 14, "time_sum": 3.259, "time_avg": 0.233, "time_max": 2.904, "time_med": 0.0, "url": "/js/8.97c0ae9c.js ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.55, "time_perc": 2.07}, {"count": 21, "time_sum": 3.2989999999999995, "time_avg": 0.157, "time_max": 2.904, "time_med": 0.0, "url": "/js/9.0b09df04.js ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 2.32, "time_perc": 2.09}, {"count": 31, "time_sum": 4.2059999999999995, "time_avg": 0.136, "time_max": 3.016, "time_med": 0.0, "url": "/js/chunk-common.ea1eb576.js ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 3.43, "time_perc": 2.67}, {"count": 21, "time_sum": 6.773000000000001, "time_avg": 0.323, "time_max": 2.354, "time_med": 0.0, "url": "/js/vendor.d09d53c2.js ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 2.32, "time_perc": 4.3}, {"count": 22, "time_sum": 0.2220000000000001, "time_avg": 0.01, "time_max": 0.021, "time_med": 0.0, "url": "/icons.svg ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 2.43, "time_perc": 0.14}, {"count": 1, "time_sum": 1.901, "time_avg": 1.901, "time_max": 1.901, "time_med": 0.0, "url": "/media/images/akvilon2/buildings/renders/V_01_Post-minx_w768.png ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 0.11, "time_perc": 1.21}, {"count": 1, "time_sum": 2.982, "time_avg": 2.982, "time_max": 2.982, "time_med": 0.0, "url": "/media/images/akvilon2/buildings/renders/V_03_Post-minx_w768.png ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 0.11, "time_perc": 1.89}, {"count": 1, "time_sum": 3.3, "time_avg": 3.3, "time_max": 3.3, "time_med": 0.0, "url": "/media/images/akvilon2/buildings/renders/V_02_Postx_w768.png ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 0.11, "time_perc": 2.09}, {"count": 1, "time_sum": 3.355, "time_avg": 3.355, "time_max": 3.355, "time_med": 0.0, "url": "/media/images/akvilon2/buildings/renders/V_04_Post-minx_w768.png ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 0.11, "time_perc": 2.13}, {"count": 1, "time_sum": 3.467, "time_avg": 3.467, "time_max": 3.467, "time_med": 0.0, "url": "/media/images/akvilon2/buildings/renders/V_05_Post-minx_w768.png ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 0.11, "time_perc": 2.2}, {"count": 7, "time_sum": 0.239, "time_avg": 0.034, "time_max": 0.05, "time_med": 0.0, "url": "/api/v1/vselect/buildings/75 ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 0.77, "time_perc": 0.15}, {"count": 7, "time_sum": 0.33199999999999996, "time_avg": 0.047, "time_max": 0.06, "time_med": 0.0, "url": "/api/v1/vselect/buildings/renders/30 ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 0.77, "time_perc": 0.21}, {"count": 12, "time_sum": 0.6160000000000002, "time_avg": 0.051, "time_max": 0.074, "time_med": 0.0, "url": "/ ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 1.33, "time_perc": 0.39}, {"count": 2, "time_sum": 0.003, "time_avg": 0.002, "time_max": 0.002, "time_med": 0.0, "url": "/fonts/roboto-v20-latin_cyrillic-regular.f3cc56e1.woff2 ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 0.22, "time_perc": 0.0}, {"count": 3, "time_sum": 0.258, "time_avg": 0.086, "time_max": 0.098, "time_med": 0.0, "url": "/api/v1/vselect/floors/976 ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 0.33, "time_perc": 0.16}, {"count": 2, "time_sum": 0.006, "time_avg": 0.003, "time_max": 0.005, "time_med": 0.0, "url": "/icons/favicon-128x128.png ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 0.22, "time_perc": 0.0}, {"count": 2, "time_sum": 0.006, "time_avg": 0.003, "time_max": 0.006, "time_med": 0.0, "url": "/icons/favicon-16x16.png ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 0.22, "time_perc": 0.0}, {"count": 2, "time_sum": 0.01, "time_avg": 0.005, "time_max": 0.005, "time_med": 0.0, "url": "/fonts/roboto-v20-latin_cyrillic-500.d450a4de.woff2 ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 0.22, "time_perc": 0.01}, {"count": 5, "time_sum": 0.129, "time_avg": 0.026, "time_max": 0.041, "time_med": 0.0, "url": "/images/card/01.svg ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 0.55, "time_perc": 0.08}, {"count": 1, "time_sum": 0.019, "time_avg": 0.019, "time_max": 0.019, "time_med": 0.0, "url": "/complex-list/ ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 0.11, "time_perc": 0.01}, {"count": 1, "time_sum": 0.014, "time_avg": 0.014, "time_max": 0.014, "time_med": 0.0, "url": "/complexes/10/building/92 ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 0.11, "time_perc": 0.01}, {"count": 3, "time_sum": 0.278, "time_avg": 0.093, "time_max": 0.117, "time_med": 0.0, "url": "/api/v1/vselect/floors/974 ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 0.33, "time_perc": 0.18}, {"count": 5, "time_sum": 0.44799999999999995, "time_avg": 0.09, "time_max": 0.111, "time_med": 0.0, "url": "/api/v1/vselect/floors/972 ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 0.55, "time_perc": 0.28}, {"count": 1, "time_sum": 0.027, "time_avg": 0.027, "time_max": 0.027, "time_med": 0.0, "url": "/api/v1/vselect/floors/plans/bn/75/4/ ", "a_host": "eva.prod.alertgroup.ru", "a_method": "GET", "count_perc": 0.11, "time_perc": 0.02}];
+    var reportDates;
+    var columns = new Array();
+    var lastRow = 150;
+    var $table = $(".report-table-body");
+    var $header = $(".report-table-header-row");
+    var $selector = $(".report-date-selector");
+
+    $(document).ready(function() {
+      $(window).bind("scroll", bindScroll);
+        var row = table[0];
+        for (k in row) {
+          columns.push(k);
+        }
+        columns = columns.sort();
+        columns = columns.slice(columns.length -1, columns.length).concat(columns.slice(0, columns.length -1));
+        drawColumns();
+        drawRows(table.slice(0, lastRow));
+        $(".report-table").tablesorter();
+    });
+
+    function drawColumns() {
+      for (var i = 0; i < columns.length; i++) {
+        var $th = $("<th></th>").text(columns[i])
+                                .addClass("report-table-header-cell")
+        $header.append($th);
+      }
+    }
+
+    function drawRows(rows) {
+      for (var i = 0; i < rows.length; i++) {
+        var row = rows[i];
+        var $row = $("<tr></tr>").addClass("report-table-body-row");
+        for (var j = 0; j < columns.length; j++) {
+          var columnName = columns[j];
+          var $cell = $("<td></td>").addClass("report-table-body-cell");
+          if (columnName == "url") {
+            var url = "http://" + row["a_host"] + row["url"];
+            var $link = $("<a></a>").attr("href", url)
+                                    .attr("title", url)
+                                    .attr("target", "_blank")
+                                    .addClass("clipped")
+                                    .addClass("url")
+                                    .text(row[columnName]);
+            $cell.addClass("report-table-body-cell-url");
+            $cell.append($link);
+          }
+          else {
+            $cell.text(row[columnName]);
+            if (columnName == "time_avg" && row[columnName] > 0.9) {
+              $cell.addClass("alert");
+            }
+          }
+          $row.append($cell);
+        }
+        $table.append($row);
+      }
+      $(".report-table").trigger("update");
+    }
+
+    function bindScroll() {
+      if($(window).scrollTop() == $(document).height() - $(window).height()) {
+        if (lastRow < 1000) {
+          drawRows(table.slice(lastRow, lastRow + 50));
+          lastRow += 50;
+        }
+      }
+    }
+
+  }(window.jQuery)
+  </script>
+</body>
+</html>

@@ -16,8 +16,9 @@ from copy import copy
 from string import Template
 
 
-DEFAULT_CONFIG_FILE_PATH = 'config.ini'
+DEFAULT_CONFIG_FILE_PATH = os.path.join('configs', 'default.ini')
 REPORT_TEMPLATE = 'report-template.html'
+
 
 DEFAULT_CONFIG = {
     'threshold': 50,
@@ -115,7 +116,6 @@ def parse_lines(log_format, lines):
     while True:
         try:
             line = re.match(log_format, next(lines))
-
         except StopIteration:
             logging.info("Parsing log file finished")
             return total_requests, total_req_time, urls
@@ -158,7 +158,7 @@ def main():
         level='INFO',
         datefmt='%Y.%m.%d %H:%M:%S',
         format='[%(asctime)s] %(levelname).1s %(message)s',
-        filename=config.get('logfile'))
+        filename=config.get('analyzer_logfile'))
 
     logging.info("Starting...")
 
@@ -188,8 +188,8 @@ def main():
     total_requests, total_req_time, urls = parse_lines(config['log_format'], log_lines)
 
     for url, stat in urls.items():
-        stat['count_perc'] = round(stat['count'] / total_requests * 100, 2)
-        stat['time_perc'] = round(stat['time_sum'] / total_req_time * 100, 2)
+        stat['count_perc'] = round(stat['count'] / (total_requests or .01) * 100, 2)
+        stat['time_perc'] = round(stat['time_sum'] / (total_req_time or .01) * 100, 2)
 
     with open(REPORT_TEMPLATE, 'rb') as f:
         template = Template(f.read().decode('utf-8'))
