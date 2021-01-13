@@ -12,7 +12,6 @@ from string import Template
 
 import argparse
 
-
 DEFAULT_CONFIG = {
     'logfile': None,
     'threshold': 50,
@@ -33,7 +32,6 @@ DEFAULT_CONFIG = {
 
 script_name, *args = sys.argv
 script_name = script_name.split('/')[-1]
-
 
 args_dict = {
     'config': {
@@ -82,7 +80,6 @@ args_dict['config']['action'] = read_conf
 def get_latest_log(config):
 
     Log = namedtuple('Log', 'dt ext path')
-
     if config['target_log_filename'] is not None:
         fn = config['target_log_filename']
         ext = fn.split(".").pop()
@@ -193,51 +190,53 @@ if __name__ == '__main__':
                 args_dict[arg]['action'](arg_params)
                 # setattr(params, arg, args[idx+1])
             else:
+                print(777)
                 show_help()
                 quit()
+    print(888)
+    logging.basicConfig(
+        level='INFO',
+        datefmt='%Y.%m.%d %H:%M:%S',
+        format='[%(asctime)s] %(levelname).1s %(message)s',
+        filename=config['logfile'])
 
-        logging.basicConfig(
-            level='INFO',
-            datefmt='%Y.%m.%d %H:%M:%S',
-            format='[%(asctime)s] %(levelname).1s %(message)s',
-            filename=config['logfile'])
+    logging.info("Starting...")
 
-        logging.info("Starting...")
+    latest_log = get_latest_log(config)
 
-        latest_log = get_latest_log(config)
+    if latest_log is None:
+        logging.info(
+            f"No log files that match the template \
+            `[{config['log_names_prefix']}|{config['log_names_regexp']}]-{config['log_date_format']}.[gz|log]` \
+            in `log_dir` ({config['log_dir']})\n--end--")
+        quit()
 
-        if latest_log is None:
-            logging.info(
-                f"No log files that match the template \
-                `[{config['log_names_prefix']}|{config['log_names_regexp']}]-{config['log_date_format']}.[gz|log]` \
-                in `log_dir` ({config['log_dir']})\n--end--")
-            quit()
+    if latest_log.dt is None:
+        report_name_postfix = 'target-'+datetime.today().strftime("%Y.%m.%d.%H%M")
+    else:
+        report_name_postfix = latest_log.dt.strftime("%Y.%m.%d")
 
-        if latest_log.dt is None:
-            report_name_postfix = 'target'+datetime.today().strftime("%Y.%m.%d.%H:%M")
-        else:
-            report_name_postfix = latest_log.dt.strftime("%Y.%m.%d")
+    latest_log_report_name = f'report-{report_name_postfix}.html'
+    latest_log_report_path = os.path.join(config['report_dir'], latest_log_report_name)
 
-        latest_log_report_name = f'report-{report_name_postfix}.html'
-        latest_log_report_path = os.path.join(config['report_dir'], latest_log_report_name)
+    # TODO
+    # if os.path.exists(latest_log_report_path):
+    #     logging.info(f"Report on latest logfile already exist. \n--end--")
+    #     quit()
 
-        # TODO
-        # if os.path.exists(latest_log_report_path):
-        #     logging.info(f"Report on latest logfile already exist. \n--end--")
-        #     quit()
+    log_lines = parse_log(latest_log)()
 
-        log_lines = parse_log(latest_log)()
+    total_requests, total_req_time, urls = parse_lines(config['log_format'], log_lines)
 
-        total_requests, total_req_time, urls = parse_lines(config['log_format'], log_lines)
+    for url, stat in urls.items():
+        stat['count_perc'] = round(stat['count'] /(total_requests or .0001)*100, 2)
+        stat['time_perc'] = round(stat['time_sum'] /(total_req_time or .0001)*100, 2)
 
-        for url, stat in urls.items():
-            stat['count_perc'] = round(stat['count']/total_requests*100, 2)
-            stat['time_perc'] = round(stat['time_sum']/total_req_time*100, 2)
+    with open(config['report_template'], 'rb') as f:
+        template = Template(f.read().decode('utf-8'))
+    print(json.dumps(list(urls.values())))
+    report = template.safe_substitute(table_json=json.dumps(list(urls.values())))
 
-        with open(config['report_template'], 'rb') as f:
-            template = Template(f.read().decode('utf-8'))
-        report = template.safe_substitute(table_json=json.dumps(list(urls.values())))
-
-        with open(latest_log_report_path, 'wb') as report_file:
-            Path(config['report_dir']).mkdir(parents=True, exist_ok=True)
-            report_file.write(report.encode('utf-8'))
+    with open(latest_log_report_path, 'wb') as report_file:
+        Path(config['report_dir']).mkdir(parents=True, exist_ok=True)
+        report_file.write(report.encode('utf-8'))

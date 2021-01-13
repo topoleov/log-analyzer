@@ -1,4 +1,5 @@
 {
   "logfile": null,
-  "target_log_filename": "access.log"
+  "log_dir": "logs",
+  "target_log_filename": "eva-front.access.log"
 }
