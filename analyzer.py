@@ -12,7 +12,7 @@ from argparse import ArgumentParser
 from configparser import ConfigParser
 from pathlib import Path
 from collections import namedtuple
-from copy import copy
+from copy import deepcopy
 from string import Template
 from collections import defaultdict
 from statistics import median
@@ -143,7 +143,7 @@ def parse_lines(log_format, lines):
         url_ = line.group('url')
         method = line.group('method')
         url_method = method + '::' + url_
-        row = urls.get(url_method, copy(row_init))
+        row = urls.get(url_method, deepcopy(row_init))
         row['url'] = url_
         try:
             row['a_host'] = line.group('host')
@@ -167,13 +167,12 @@ def parse_lines(log_format, lines):
         # for plot
         minute = line.group('dateandtime')
         minute = ":".join(minute.split(":")[:-1])
-        print(minute)
         reqs_per_minuts[minute] += 1
 
-        row_hour = ":".join(minute.split(":")[-1])
+        row_hour = minute.split(":")[-2]
 
-        if hours_axis[-1] != row_hour:
-            hours_axis.append(row_hour)
+        if hours_axis[-1] != int(row_hour):
+            hours_axis.append(int(row_hour))
 
         if not reqs_per_minuts[minute] % 50:
             c_reqs_axis.append(reqs_per_minuts[minute])
@@ -228,7 +227,6 @@ def main():
     total_requests, total_req_time, urls = parse_lines(config['log_format'], log_lines)
     logging.info("Parsing log file finished.")
 
-
     bad_format_rows_counter = parse_lines.bad_format_rows_counter
     total_rows = parse_lines.total_rows
 
@@ -238,13 +236,30 @@ def main():
         # logging.info()
         raise logging.exception("Lines that was not correctly parsed too mach.")
 
+    # Drawing the RPM plot
+    fig = plt.figure()
+    fig.patch.set_facecolor('black')
 
+    plt.grid(True,  linestyle='--')
+
+    ax = fig.add_subplot(111)
+    ax.patch.set_facecolor('orange')
+    ax.patch.set_alpha(.2)
     plt.plot(
         reqs_per_minuts.keys(),
         reqs_per_minuts.values()
     )
-    plt.axis()
-    plt.show()
+
+    plt.xticks(hours_axis[1:], color='blue')
+    ax.tick_params(axis='x', colors='red')
+    ax.tick_params(axis='y', colors='red')
+
+    fig.suptitle('Request per minuts', fontsize=12, color='grey')
+    ax.set_xlabel('Requests', fontsize=10, color='grey')
+    ax.set_ylabel('Hours', fontsize='medium', color='grey')
+
+    plot_image_path = ''.join(latest_log_report_path.split(".")[:-1]+['.png'])
+    plt.savefig(plot_image_path, dpi=100)
 
     for url, stat in urls.items():
         stat['count_perc'] = round(stat['count'] / (total_requests or .01) * 100, 2)
@@ -253,7 +268,9 @@ def main():
 
     with open(REPORT_TEMPLATE, 'rb') as f:
         template = Template(f.read().decode('utf-8'))
-    report = template.safe_substitute(table_json=json.dumps(list(urls.values())))
+
+    plot_image_path = plot_image_path.split("/")[-1]
+    report = template.safe_substitute(plot_image_path=plot_image_path, table_json=json.dumps(list(urls.values())))
 
     with open(latest_log_report_path, 'wb') as report_file:
         Path(config['report_dir']).mkdir(parents=True, exist_ok=True)
