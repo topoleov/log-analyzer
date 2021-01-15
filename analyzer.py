@@ -15,6 +15,7 @@ from collections import namedtuple
 from copy import copy
 from string import Template
 from collections import defaultdict
+from statistics import median
 import matplotlib.pyplot as plt
 
 DEFAULT_CONFIG_FILE_PATH = os.path.join('confs', 'default.ini')
@@ -120,7 +121,7 @@ def parse_lines(log_format, lines):
                 'time_sum': .0,
                 'time_avg': .0,
                 'time_max': .0,
-                'time_med': .0,
+                'time_med': [],
                 }
 
     urls = dict()
@@ -153,6 +154,8 @@ def parse_lines(log_format, lines):
         row['time_sum'] += req_time
         row['time_avg'] = round(row['time_sum'] / row['count'], 3)
         row['time_max'] = req_time if row['time_max'] < req_time else row['time_max']
+        row['time_med'].append(req_time)
+
         urls[url_method] = row
 
         total_requests += 1
@@ -163,10 +166,11 @@ def parse_lines(log_format, lines):
 
         # for plot
         minute = line.group('dateandtime')
-        minute = minute.split(":")[-2].join(":")
+        minute = ":".join(minute.split(":")[:-1])
+        print(minute)
         reqs_per_minuts[minute] += 1
 
-        row_hour = minute.split(":")[-1].join(":")
+        row_hour = ":".join(minute.split(":")[-1])
 
         if hours_axis[-1] != row_hour:
             hours_axis.append(row_hour)
@@ -218,27 +222,34 @@ def main():
     log_lines = parse_log(latest_log)()
     logging.info(f'ok"')
 
-    plt.plot(
-        reqs_per_minuts.keys(),
-        reqs_per_minuts.values()
-    )
-    plt.show()
+
     # Starting to parse log file
     logging.info("Starting to parse log file...")
     total_requests, total_req_time, urls = parse_lines(config['log_format'], log_lines)
     logging.info("Parsing log file finished.")
 
+
     bad_format_rows_counter = parse_lines.bad_format_rows_counter
     total_rows = parse_lines.total_rows
 
     success_parsed_persent = bad_format_rows_counter / (total_rows or 1) * 100
+
     if success_parsed_persent > int(config['threshold']):
         # logging.info()
         raise logging.exception("Lines that was not correctly parsed too mach.")
 
+
+    plt.plot(
+        reqs_per_minuts.keys(),
+        reqs_per_minuts.values()
+    )
+    plt.axis()
+    plt.show()
+
     for url, stat in urls.items():
         stat['count_perc'] = round(stat['count'] / (total_requests or .01) * 100, 2)
         stat['time_perc'] = round(stat['time_sum'] / (total_req_time or .01) * 100, 2)
+        stat['time_med'] = round(median(stat['time_med']), 4)
 
     with open(REPORT_TEMPLATE, 'rb') as f:
         template = Template(f.read().decode('utf-8'))
