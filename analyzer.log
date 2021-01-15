@@ -1,0 +1,36 @@
+[2021.01.15 00:32:23] I Start
+[2021.01.15 00:32:23] I Trying to open log file:
+ "logs/eva-front.durty.access.log"
+[2021.01.15 00:32:23] E [Errno 2] No such file or directory: 'logs/eva-front.durty.access.log'
+Traceback (most recent call last):
+  File "/home/andrey/study/python-advanced/log-analyzer/analyzer.py", line 233, in <module>
+    main()
+  File "/home/andrey/study/python-advanced/log-analyzer/analyzer.py", line 202, in main
+    log_lines = parse_log(latest_log)()
+  File "/home/andrey/study/python-advanced/log-analyzer/analyzer.py", line 98, in parse_log
+    log_file = {'gz': gzip.open}.get(log.ext, open)(log.path)
+FileNotFoundError: [Errno 2] No such file or directory: 'logs/eva-front.durty.access.log'
+[2021.01.15 00:32:42] I Start
+[2021.01.15 00:32:42] I Trying to open log file:
+ "logs/eva-front.durty.access.log"
+[2021.01.15 00:32:42] E [Errno 2] No such file or directory: 'logs/eva-front.durty.access.log'
+Traceback (most recent call last):
+  File "/home/andrey/study/python-advanced/log-analyzer/analyzer.py", line 235, in <module>
+    main()
+  File "/home/andrey/study/python-advanced/log-analyzer/analyzer.py", line 204, in main
+    log_lines = parse_log(latest_log)()
+  File "/home/andrey/study/python-advanced/log-analyzer/analyzer.py", line 98, in parse_log
+    log_file = {'gz': gzip.open}.get(log.ext, open)(log.path)
+FileNotFoundError: [Errno 2] No such file or directory: 'logs/eva-front.durty.access.log'
+[2021.01.15 00:34:24] I Start
+[2021.01.15 00:34:24] I Trying to open log file:
+ "logs/eva-front.durty.access.log"
+[2021.01.15 00:34:24] E [Errno 2] No such file or directory: 'logs/eva-front.durty.access.log'
+Traceback (most recent call last):
+  File "/home/andrey/study/python-advanced/log-analyzer/analyzer.py", line 235, in <module>
+    main()
+  File "/home/andrey/study/python-advanced/log-analyzer/analyzer.py", line 204, in main
+    log_lines = parse_log(latest_log)()
+  File "/home/andrey/study/python-advanced/log-analyzer/analyzer.py", line 98, in parse_log
+    log_file = {'gz': gzip.open}.get(log.ext, open)(log.path)
+FileNotFoundError: [Errno 2] No such file or directory: 'logs/eva-front.durty.access.log'
