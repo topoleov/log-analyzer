@@ -12,9 +12,9 @@ from argparse import ArgumentParser
 from configparser import ConfigParser
 from pathlib import Path
 from collections import namedtuple
-from copy import copy
+from copy import deepcopy
 from string import Template
-
+from statistics import median
 
 DEFAULT_CONFIG_FILE_PATH = os.path.join('configs', 'default.ini')
 REPORT_TEMPLATE = 'report-template.html'
@@ -34,6 +34,9 @@ DEFAULT_CONFIG = {
         r' (?P<bytessent>\d+) (["](?P<referer>(\-)|(\S+))["]) (["](?P<useragent>.+)["])'
         r' (?P<request_time>([0-9]*[.])?[0-9]+) - (["](?P<host>(\-)|(.+))["])',
 }
+
+unique_users = {}
+all_requests = 0
 
 
 def read_conf(conf_file=None):
@@ -100,6 +103,7 @@ def parse_log(log):
 
 
 def parse_lines(log_format, lines):
+    global all_requests
 
     total_requests = 0
     total_req_time = .0
@@ -108,7 +112,7 @@ def parse_lines(log_format, lines):
                 'time_sum': .0,
                 'time_avg': .0,
                 'time_max': .0,
-                'time_med': .0,
+                'time_med': [],
                 }
 
     urls = dict()
@@ -128,7 +132,7 @@ def parse_lines(log_format, lines):
         url_ = line.group('url')
         method = line.group('method')
         url_method = method+'::'+url_
-        row = urls.get(url_method, copy(url_init))
+        row = urls.get(url_method, deepcopy(url_init))
         row['url'] = url_
         try:
             row['a_host'] = line.group('host')
@@ -139,10 +143,14 @@ def parse_lines(log_format, lines):
         row['time_sum'] += req_time
         row['time_avg'] = round(row['time_sum'] / row['count'], 3)
         row['time_max'] = req_time if row['time_max'] < req_time else row['time_max']
+        row['time_med'].append(req_time)
         urls[url_method] = row
 
         total_requests += 1
         total_req_time += req_time
+
+        unique_users[line.group('url')] = 1
+        all_requests += 1
 
 
 def main():
@@ -190,7 +198,8 @@ def main():
     for url, stat in urls.items():
         stat['count_perc'] = round(stat['count'] / (total_requests or .01) * 100, 2)
         stat['time_perc'] = round(stat['time_sum'] / (total_req_time or .01) * 100, 2)
-
+        stat['time_med'] = round(median(stat['time_med']), 4)
+        stat['time_sum'] = round(stat['time_sum'], 2)
     with open(REPORT_TEMPLATE, 'rb') as f:
         template = Template(f.read().decode('utf-8'))
     report = template.safe_substitute(table_json=json.dumps(list(urls.values())))
