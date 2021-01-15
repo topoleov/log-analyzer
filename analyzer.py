@@ -14,11 +14,12 @@ from pathlib import Path
 from collections import namedtuple
 from copy import copy
 from string import Template
+from collections import defaultdict
+import matplotlib.pyplot as plt
 
-
-DEFAULT_CONFIG_FILE_PATH = os.path.join('configs', 'default.ini')
+DEFAULT_CONFIG_FILE_PATH = os.path.join('confs', 'default.ini')
 REPORT_TEMPLATE = 'report-template.html'
-
+TOTAL_ROWS = 0
 
 DEFAULT_CONFIG = {
     'threshold': 50,
@@ -34,6 +35,10 @@ DEFAULT_CONFIG = {
         r' (?P<bytessent>\d+) (["](?P<referer>(\-)|(\S+))["]) (["](?P<useragent>.+)["])'
         r' (?P<request_time>([0-9]*[.])?[0-9]+) - (["](?P<host>(\-)|(.+))["])',
 }
+
+reqs_per_minuts = defaultdict(int)
+hours_axis = ["-"]
+c_reqs_axis = []
 
 
 def read_conf(conf_file=None):
@@ -90,21 +95,28 @@ def get_latest_log(config):
 
 
 def parse_log(log):
+    """
+    Closure that returns iterator of log lines
+    """
     log_file = {'gz': gzip.open}.get(log.ext, open)(log.path)
 
     def log_iterator():
         for line in log_file:
             yield line
         log_file.close()
+
     return log_iterator
 
 
 def parse_lines(log_format, lines):
 
+    parse_lines.total_rows = 0
+    parse_lines.bad_format_rows_counter = 0
+
     total_requests = 0
     total_req_time = .0
 
-    url_init = {'count': 0,
+    row_init = {'count': 0,
                 'time_sum': .0,
                 'time_avg': .0,
                 'time_max': .0,
@@ -117,18 +129,20 @@ def parse_lines(log_format, lines):
         try:
             line = re.match(log_format, next(lines))
         except StopIteration:
-            logging.info("Parsing log file finished")
             return total_requests, total_req_time, urls
 
         if not line:
-            # TODO: check for threshold
+            parse_lines.bad_format_rows_counter += 1
             continue
 
+        parse_lines.total_rows += 1
+
         req_time = float(line.group('request_time'))
+
         url_ = line.group('url')
         method = line.group('method')
-        url_method = method+'::'+url_
-        row = urls.get(url_method, copy(url_init))
+        url_method = method + '::' + url_
+        row = urls.get(url_method, copy(row_init))
         row['url'] = url_
         try:
             row['a_host'] = line.group('host')
@@ -143,6 +157,22 @@ def parse_lines(log_format, lines):
 
         total_requests += 1
         total_req_time += req_time
+
+        parse_lines.total_rows += 1
+        parse_lines.bad_format_rows_counter += 1
+
+        # for plot
+        minute = line.group('dateandtime')
+        minute = minute.split(":")[-2].join(":")
+        reqs_per_minuts[minute] += 1
+
+        row_hour = minute.split(":")[-1].join(":")
+
+        if hours_axis[-1] != row_hour:
+            hours_axis.append(row_hour)
+
+        if not reqs_per_minuts[minute] % 50:
+            c_reqs_axis.append(reqs_per_minuts[minute])
 
 
 def main():
@@ -160,7 +190,7 @@ def main():
         format='[%(asctime)s] %(levelname).1s %(message)s',
         filename=config.get('analyzer_logfile'))
 
-    logging.info("Starting...")
+    logging.info("Start")
 
     latest_log = get_latest_log(config)
 
@@ -183,9 +213,28 @@ def main():
         logging.info(f"Report on latest logfile already exist. \n--end--")
         quit()
 
+    # opening the log file and getting generator of them lines
+    logging.info(f'Trying to open log file:\n "{latest_log.path}"')
     log_lines = parse_log(latest_log)()
+    logging.info(f'ok"')
 
+    plt.plot(
+        reqs_per_minuts.keys(),
+        reqs_per_minuts.values()
+    )
+    plt.show()
+    # Starting to parse log file
+    logging.info("Starting to parse log file...")
     total_requests, total_req_time, urls = parse_lines(config['log_format'], log_lines)
+    logging.info("Parsing log file finished.")
+
+    bad_format_rows_counter = parse_lines.bad_format_rows_counter
+    total_rows = parse_lines.total_rows
+
+    success_parsed_persent = bad_format_rows_counter / (total_rows or 1) * 100
+    if success_parsed_persent > int(config['threshold']):
+        # logging.info()
+        raise logging.exception("Lines that was not correctly parsed too mach.")
 
     for url, stat in urls.items():
         stat['count_perc'] = round(stat['count'] / (total_requests or .01) * 100, 2)
@@ -201,4 +250,9 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        logging.info("Interrupted")
+    except Exception as ex:
+        logging.exception(ex)
