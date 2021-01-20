@@ -240,7 +240,7 @@ def main():
     fig = plt.figure()
     fig.patch.set_facecolor('black')
 
-    plt.grid(True,  linestyle='--')
+    # plt.grid(True,  linestyle='--')
 
     ax = fig.add_subplot(111)
     ax.patch.set_facecolor('orange')
@@ -250,13 +250,12 @@ def main():
         reqs_per_minuts.values()
     )
 
-    plt.xticks(hours_axis[1:], color='blue')
-    ax.tick_params(axis='x', colors='red')
+    # plt.xticks(hours_axis[1:], color='blue')
     ax.tick_params(axis='y', colors='red')
-
+    # plt.axis("off")
     fig.suptitle('Request per minuts', fontsize=12, color='grey')
-    ax.set_xlabel('Requests', fontsize=10, color='grey')
-    ax.set_ylabel('Hours', fontsize='medium', color='grey')
+    # ax.set_xlabel('Hours', fontsize=10, color='grey')
+    ax.set_ylabel('Requests', fontsize='medium', color='grey')
 
     plot_image_path = ''.join(latest_log_report_path.split(".")[:-1]+['.png'])
     plt.savefig(plot_image_path, dpi=100)
@@ -270,6 +269,7 @@ def main():
         template = Template(f.read().decode('utf-8'))
 
     plot_image_path = plot_image_path.split("/")[-1]
+    plot_image_path = plot_image_path.split("\\")[-1]
     report = template.safe_substitute(plot_image_path=plot_image_path, table_json=json.dumps(list(urls.values())))
 
     with open(latest_log_report_path, 'wb') as report_file:
