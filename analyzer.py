@@ -1,6 +1,27 @@
 """
 Анализатор логов
+---
+
+Строит отчёт по файлу лога от сервера Nginx
+В отчете представлена сравнительная таблица запросов на урл за период с параметрами:
+
+Max RPM - максимальное кол-во запросов за минуту за период отчета
+Median RPM - медиана по количеству запросов в минуту
+
+url - урл запроса
+host - хост запроса
+method - метод запроса
+count - количество запросов на этот url
+count_perc - процент от общего кол-ва запросов
+time_avg - среднее вреся запроса для урла
+time_max - максимальное время запроса для урла
+time_med - медиана
+time_perc - процент от общего времени
+time_sum - сумма времени ответа для конкретного урла
+
+Поведение программы можно изменить указав через флаг --conf путь к конфигурационному файлу в формате .ini
 """
+
 import os
 import logging
 import json
@@ -37,8 +58,6 @@ DEFAULT_CONFIG = {
 }
 
 reqs_per_minuts = defaultdict(int)
-hours_axis = ["-"]
-c_reqs_axis = []
 
 unique_users = {}
 all_requests = 0
@@ -112,6 +131,8 @@ def parse_log(log):
 
 
 def get_target_day(config):
+    """
+    Getting the report day"""
 
     target_day = config.get('target_day')
 
@@ -125,6 +146,9 @@ def get_target_day(config):
 
 
 def parse_lines(config, target_day, lines):
+    """
+    Parsing the lines for target day"""
+
     global all_requests
 
     parse_lines.total_rows = 0
@@ -183,18 +207,10 @@ def parse_lines(config, target_day, lines):
         parse_lines.total_rows += 1
         parse_lines.bad_format_rows_counter += 1
 
-        # for plot
         minute = line.group('dateandtime')
         minute = ":".join(minute.split(":")[:-1])
         reqs_per_minuts[minute] += 1
 
-        row_hour = minute.split(":")[-2]
-
-        if hours_axis[-1] != int(row_hour):
-            hours_axis.append(int(row_hour))
-
-        if not reqs_per_minuts[minute] % 50:
-            c_reqs_axis.append(reqs_per_minuts[minute])
         unique_users[line.group('ipaddress')] = 1
         all_requests += 1
 
@@ -241,11 +257,10 @@ def main():
         logging.info(f"Report on latest logfile already exist. \n--end--")
         quit()
 
-    # opening the log file and getting generator of them lines
+    # Opening the log file and getting generator of them lines
     logging.info(f'Trying to open log file:\n "{latest_log.path}"')
     log_lines = parse_log(latest_log)()
     logging.info(f'ok"')
-
 
     # Starting to parse log file
     logging.info("Starting to parse log file...")
@@ -258,7 +273,6 @@ def main():
     success_parsed_persent = bad_format_rows_counter / (total_rows or 1) * 100
 
     if success_parsed_persent > int(config['threshold']):
-        # logging.info()
         raise logging.exception("Lines that was not correctly parsed too mach.")
 
     for url, stat in urls.items():
