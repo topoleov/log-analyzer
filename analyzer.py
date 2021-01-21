@@ -16,8 +16,6 @@ from copy import deepcopy
 from string import Template
 from collections import defaultdict
 from statistics import median
-import matplotlib.pyplot as plt
-from statistics import median
 
 DEFAULT_CONFIG_FILE_PATH = os.path.join('confs', 'default.ini')
 
