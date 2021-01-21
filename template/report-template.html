@@ -46,13 +46,33 @@
     .alert {
       color: red;
     }
+    .info {
+     float: left;
+      color: white;
+    }
   </style>
 </head>
 
 <body>
-  <img src="$plot_image_path">
-  <p>Max RPM:</p>
-  <p>Med RPM:</p>
+<!--  <img src="$plot_image_path">-->
+<div class="info">
+  <table>
+    <tr>
+      <td>
+        Report date: $report_date
+      </td>
+      <td>
+        Max RPM: $max_rpm
+      </td>
+      <td>
+        Median RPM: $med_rpm
+      </td>
+      <td>
+        Total unique users: $unique_users
+      </td>
+    </tr>
+  </table>
+</div>
   <table border="1" class="report-table">
   <thead>
     <tr class="report-table-header-row">
@@ -61,8 +81,8 @@
   <tbody class="report-table-body">
   </tbody>
 
-  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.1/js/jquery.tablesorter.min.js"></script>
+  <script type="text/javascript" src="js/jquery.min.js"></script>
+  <script type="text/javascript" src="js/jquery.tablesorter.js"></script>
   <script type="text/javascript">
   !function($) {
     var table = $table_json;

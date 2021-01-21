@@ -17,10 +17,11 @@ from string import Template
 from collections import defaultdict
 from statistics import median
 import matplotlib.pyplot as plt
+from statistics import median
 
 DEFAULT_CONFIG_FILE_PATH = os.path.join('confs', 'default.ini')
-REPORT_TEMPLATE = 'report-template.html'
-TOTAL_ROWS = 0
+
+REPORT_TEMPLATE = os.path.join('template', 'report-template.html')
 
 DEFAULT_CONFIG = {
     'threshold': 50,
@@ -40,6 +41,9 @@ DEFAULT_CONFIG = {
 reqs_per_minuts = defaultdict(int)
 hours_axis = ["-"]
 c_reqs_axis = []
+
+unique_users = {}
+all_requests = 0
 
 
 def read_conf(conf_file=None):
@@ -109,7 +113,21 @@ def parse_log(log):
     return log_iterator
 
 
-def parse_lines(log_format, lines):
+def get_target_day(config):
+
+    target_day = config.get('target_day')
+
+    if target_day:
+        try:
+            return datetime.strptime(target_day, '%d.%m.%Y').date()
+        except ValueError:
+            logging.exception("bad `target_day` format. Expected: dd.mm.yyyy")
+    else:
+        return datetime.today().date()
+
+
+def parse_lines(config, target_day, lines):
+    global all_requests
 
     parse_lines.total_rows = 0
     parse_lines.bad_format_rows_counter = 0
@@ -128,10 +146,14 @@ def parse_lines(log_format, lines):
 
     while True:
         try:
-            line = re.match(log_format, next(lines))
+            line = re.match(config['log_format'], next(lines))
         except StopIteration:
             return total_requests, total_req_time, urls
 
+        dateandtime = line.group('dateandtime')
+        day = datetime.strptime(dateandtime.split()[0], "%d/%b/%Y:%H:%M:%S").date()
+        if day != target_day:
+            continue
         if not line:
             parse_lines.bad_format_rows_counter += 1
             continue
@@ -142,7 +164,7 @@ def parse_lines(log_format, lines):
 
         url_ = line.group('url')
         method = line.group('method')
-        url_method = method + '::' + url_
+        url_method = method+'::'+url_
         row = urls.get(url_method, deepcopy(row_init))
         row['url'] = url_
         try:
@@ -155,7 +177,6 @@ def parse_lines(log_format, lines):
         row['time_avg'] = round(row['time_sum'] / row['count'], 3)
         row['time_max'] = req_time if row['time_max'] < req_time else row['time_max']
         row['time_med'].append(req_time)
-
         urls[url_method] = row
 
         total_requests += 1
@@ -176,9 +197,12 @@ def parse_lines(log_format, lines):
 
         if not reqs_per_minuts[minute] % 50:
             c_reqs_axis.append(reqs_per_minuts[minute])
+        unique_users[line.group('ipaddress')] = 1
+        all_requests += 1
 
 
 def main():
+
     parser = ArgumentParser(__doc__)
     parser.add_argument('--config', default=DEFAULT_CONFIG_FILE_PATH, help='Use a custom config', nargs='?')
     args = parser.parse_args()
@@ -204,8 +228,11 @@ def main():
                 in `log_dir` ({config['log_dir']})\n--end--")
         quit()
 
+    target_day = get_target_day(config)
+    target_day_str = target_day.strftime("%Y.%m.%d")
+
     if latest_log.dt is None:
-        report_name_postfix = 'target-' + datetime.today().strftime("%Y.%m.%d.%H%M")
+        report_name_postfix = 'target-' + target_day_str
     else:
         report_name_postfix = latest_log.dt.strftime("%Y.%m.%d")
 
@@ -224,7 +251,7 @@ def main():
 
     # Starting to parse log file
     logging.info("Starting to parse log file...")
-    total_requests, total_req_time, urls = parse_lines(config['log_format'], log_lines)
+    total_requests, total_req_time, urls = parse_lines(config, target_day, log_lines)
     logging.info("Parsing log file finished.")
 
     bad_format_rows_counter = parse_lines.bad_format_rows_counter
@@ -236,41 +263,22 @@ def main():
         # logging.info()
         raise logging.exception("Lines that was not correctly parsed too mach.")
 
-    # Drawing the RPM plot
-    fig = plt.figure()
-    fig.patch.set_facecolor('black')
-
-    # plt.grid(True,  linestyle='--')
-
-    ax = fig.add_subplot(111)
-    ax.patch.set_facecolor('orange')
-    ax.patch.set_alpha(.2)
-    plt.plot(
-        reqs_per_minuts.keys(),
-        reqs_per_minuts.values()
-    )
-
-    # plt.xticks(hours_axis[1:], color='blue')
-    ax.tick_params(axis='y', colors='red')
-    # plt.axis("off")
-    fig.suptitle('Request per minuts', fontsize=12, color='grey')
-    # ax.set_xlabel('Hours', fontsize=10, color='grey')
-    ax.set_ylabel('Requests', fontsize='medium', color='grey')
-
-    plot_image_path = ''.join(latest_log_report_path.split(".")[:-1]+['.png'])
-    plt.savefig(plot_image_path, dpi=100)
-
     for url, stat in urls.items():
         stat['count_perc'] = round(stat['count'] / (total_requests or .01) * 100, 2)
         stat['time_perc'] = round(stat['time_sum'] / (total_req_time or .01) * 100, 2)
         stat['time_med'] = round(median(stat['time_med']), 4)
+        stat['time_sum'] = round(stat['time_sum'], 2)
 
     with open(REPORT_TEMPLATE, 'rb') as f:
         template = Template(f.read().decode('utf-8'))
 
-    plot_image_path = plot_image_path.split("/")[-1]
-    plot_image_path = plot_image_path.split("\\")[-1]
-    report = template.safe_substitute(plot_image_path=plot_image_path, table_json=json.dumps(list(urls.values())))
+    report = template.safe_substitute(
+        report_date=target_day_str,
+        table_json=json.dumps(list(urls.values())),
+        unique_users=len(unique_users.keys()),
+        max_rpm=max(list(reqs_per_minuts.values())),
+        med_rpm=median(list(reqs_per_minuts.values())),
+    )
 
     with open(latest_log_report_path, 'wb') as report_file:
         Path(config['report_dir']).mkdir(parents=True, exist_ok=True)
