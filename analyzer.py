@@ -37,10 +37,16 @@ from copy import deepcopy
 from string import Template
 from collections import defaultdict
 from statistics import median
+import pathlib
 
-DEFAULT_CONFIG_FILE_PATH = os.path.join('confs', 'default.ini')
 
-REPORT_TEMPLATE = os.path.join('template', 'report-template.html')
+BASE_DIR = pathlib.Path(__file__).parent.absolute()
+
+DEFAULT_CONFIG_FILE_PATH = os.path.join(BASE_DIR, 'confs')
+DEFAULT_CONFIG_FILE_PATH = os.path.join(DEFAULT_CONFIG_FILE_PATH, 'default.ini')
+
+REPORT_TEMPLATE = os.path.join(BASE_DIR, 'template')
+REPORT_TEMPLATE = os.path.join(REPORT_TEMPLATE, 'report-template.html')
 
 DEFAULT_CONFIG = {
     'threshold': 50,
@@ -172,12 +178,13 @@ def parse_lines(config, target_day, lines):
         except StopIteration:
             return total_requests, total_req_time, urls
 
+        if not line:
+            parse_lines.bad_format_rows_counter += 1
+            continue
+
         dateandtime = line.group('dateandtime')
         day = datetime.strptime(dateandtime.split()[0], "%d/%b/%Y:%H:%M:%S").date()
         if day != target_day:
-            continue
-        if not line:
-            parse_lines.bad_format_rows_counter += 1
             continue
 
         parse_lines.total_rows += 1
